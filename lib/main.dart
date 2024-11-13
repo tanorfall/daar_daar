@@ -1,3 +1,4 @@
+import 'package:daar_daar/login/login.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -7,105 +8,104 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Daar Daar Express', // app title
+      title: 'daar daar Login',
       theme: ThemeData(
-        
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.white, // Définition de l'arrière-plan global en blanc
       ),
-      home: const MyHomePage(title: 'Daar daar express'),
+      home: const LoginScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+// Liste d'utilisateurs pour l'authentification simulée
+/*
+const users = {
+  'tanorfall@gmail.com': '12345',
+};
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  // Durée de la simulation de temps de chargement pour l'authentification
+  Duration get loginTime => const Duration(milliseconds: 2250);
 
-  final String title;
+  // Méthode d'authentification utilisateur
+  Future<String?> _authUser(LoginData data) {
+    debugPrint('Name: ${data.name}, Password: ${data.password}');
+    return Future.delayed(loginTime).then((_) {
+      if (!users.containsKey(data.name)) {
+        return 'User does not exist'; // Retourne une erreur si l'utilisateur n'existe pas
+      }
+      if (users[data.name] != data.password) {
+        return 'Password does not match'; // Retourne une erreur si le mot de passe est incorrect
+      }
+      return null; // Authentification réussie
+    });
+  }
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+  // Méthode de création de compte
+  Future<String?> _signupUser(SignupData data) {
+    debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
+    return Future.delayed(loginTime).then((_) {
+      return null; // Succès de l'inscription (aucune validation réelle ici)
+    });
+  }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+  // Méthode de récupération de mot de passe
+  Future<String> _recoverPassword(String name) {
+    debugPrint('Name: $name');
+    return Future.delayed(loginTime).then((_) {
+      if (!users.containsKey(name)) {
+        return 'User does not exist'; // Erreur si l'utilisateur n'existe pas
+      }
+      return 'success'; // Succès de la récupération
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    return FlutterLogin(
+      title: 'Darr Darr',
+      logo: const AssetImage('assets/images/logo.png'),
+      onLogin: _authUser, // Fonction d'authentification à appeler lors de la connexion
+      onSignup: _signupUser, // Fonction d'inscription à appeler lors de la création d'un compte
+      onSubmitAnimationCompleted: () {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const MyHomePage(title: 'Dashboard'), // Redirection après connexion
+        ));
+      },
+      onRecoverPassword: _recoverPassword, // Fonction de récupération de mot de passe
+      // Personnalisation de l'apparence du formulaire de connexion
+      theme: LoginTheme(
+        primaryColor: Colors.blue,  // Couleur principale pour les éléments
+        accentColor: Colors.blueAccent, // Couleur d'accentuation
+        errorColor: Colors.redAccent, // Couleur pour les messages d'erreur
+        titleStyle: const TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+        ),
+        pageColorLight: Colors.white, // Couleur d'arrière-plan claire
+        pageColorDark: Colors.white, // Couleur d'arrière-plan sombre
+        cardTheme: const CardTheme(
+          color: Color.fromARGB(255, 234, 171, 75), // Arrière-plan du formulaire en orange
+          elevation: 5, // Ombre autour de la carte pour la mettre en relief
+          margin: EdgeInsets.symmetric(horizontal: 20),
+        ),
+        bodyStyle: const TextStyle(
+          color: Colors.black, // Couleur du texte pour le corps
+        ),
+        textFieldStyle: const TextStyle(
+          color: Colors.black, // Couleur du texte pour les champs de texte
+        ),
+        buttonStyle: const TextStyle(
+          color: Colors.white, // Couleur du texte pour les boutons
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
+*/
