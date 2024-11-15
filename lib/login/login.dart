@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
         pageColorLight: Colors.white, // Couleur d'arrière-plan claire
         pageColorDark: Colors.white, // Couleur d'arrière-plan sombre
         cardTheme: const CardTheme(
-          color: Color.fromARGB(255, 218, 68, 41), // Arrière-plan du formulaire en orange
+          color: Color.fromARGB(255, 215, 134, 48), // Arrière-plan du formulaire en orange
           elevation: 5, // Ombre autour de la carte pour la mettre en relief
           margin: EdgeInsets.symmetric(horizontal: 20),
         ),

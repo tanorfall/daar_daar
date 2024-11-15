@@ -1,7 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:bottom_bar/bottom_bar.dart';
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key, required String title});
+void main() {
+  runApp(const MyApp());
+}
+
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, ThemeMode currentMode, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Daar Daar Express',
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          themeMode: currentMode,
+          home: const MyHomePage(title: 'Daar Daar Express'),
+        );
+      },
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _currentPage = 0;
+  final PageController _pageController = PageController();
+
+  final List<Widget> _pages = [
+    const DashboardPage(),
+    const CoursesPage(),
+    const ProfilePage(),
+    const SettingsPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -9,88 +53,150 @@ class MyHomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Daar Daar Express'),
         backgroundColor: const Color.fromARGB(255, 215, 134, 48),
+        actions: [
+          IconButton(
+            icon: Icon(
+              themeNotifier.value == ThemeMode.dark
+                  ? Icons.dark_mode
+                  : Icons.light_mode,
+            ),
+            onPressed: () {
+              themeNotifier.value =
+                  themeNotifier.value == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+            },
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section de bienvenue
-            Text(
-              'Bienvenue sur Daar Daar Express',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Sélectionnez un service ci-dessous pour commencer',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 20),
+      body: PageView(
+        controller: _pageController,
+        children: _pages,
+        onPageChanged: (index) {
+          setState(() => _currentPage = index);
+        },
+      ),
+      bottomNavigationBar: BottomBar(
+        selectedIndex: _currentPage,
+        onTap: (index) {
+          _pageController.jumpToPage(index);
+          setState(() => _currentPage = index);
+        },
+        items: [
+          BottomBarItem(
+            icon: const Icon(Icons.home),
+            title: const Text('Accueil'),
+            activeColor: Colors.blueAccent,
+          ),
+          BottomBarItem(
+            icon: const Icon(Icons.delivery_dining),
+            title: const Text('Courses'),
+            activeColor: Colors.green,
+          ),
+          BottomBarItem(
+            icon: const Icon(Icons.person),
+            title: const Text('Profil'),
+            activeColor: Colors.orange,
+          ),
+          BottomBarItem(
+            icon: const Icon(Icons.settings),
+            title: const Text('Paramètres'),
+            activeColor: Colors.redAccent,
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-            // Boutons pour les services de livraison et de transport
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _ServiceCard(
+class DashboardPage extends StatelessWidget {
+  const DashboardPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Titre principal
+          Text(
+            'Bienvenue sur Daar Daar Express',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Sélectionnez un service ci-dessous pour commencer',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 20),
+
+          // Boutons pour Livraison et Transport
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _ServiceCard(
                   icon: Icons.delivery_dining,
                   title: 'Livraison',
                   color: Colors.blueAccent,
                   onTap: () {
-                    // Action à définir plus tard
                     _showServiceMessage(context, 'Service de livraison');
                   },
                 ),
-                _ServiceCard(
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _ServiceCard(
                   icon: Icons.local_taxi,
                   title: 'Transport',
                   color: Colors.green,
                   onTap: () {
-                    // Action à définir plus tard
                     _showServiceMessage(context, 'Service de transport');
                   },
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
 
-            // Section pour les commandes en cours
-            Text(
-              'Commandes en cours',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 10),
+          // Section des transactions récentes
+          Text(
+            'Transactions récentes',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 10),
 
-            // Liste des commandes fictives
-            ListView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              children: const [
-                _OrderCard(
-                  orderId: 'CMD001',
-                  destination: 'Point E, Dakar',
-                  status: 'En cours',
-                ),
-                _OrderCard(
-                  orderId: 'CMD002',
-                  destination: 'Mermoz, Dakar',
-                  status: 'Livré',
-                ),
-                _OrderCard(
-                  orderId: 'CMD003',
-                  destination: 'Almadies, Dakar',
-                  status: 'En attente',
-                ),
-              ],
-            ),
-          ],
-        ),
+          // Liste des transactions
+          ListView(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: const [
+              _TransactionCard(
+                transactionId: 'TRX001',
+                amount: '15,000 FCFA',
+                date: '2024-11-01',
+                status: 'Réussi',
+              ),
+              _TransactionCard(
+                transactionId: 'TRX002',
+                amount: '5,000 FCFA',
+                date: '2024-11-03',
+                status: 'Échoué',
+              ),
+              _TransactionCard(
+                transactionId: 'TRX003',
+                amount: '10,000 FCFA',
+                date: '2024-11-10',
+                status: 'En attente',
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  // Fonction pour afficher un message temporaire pour chaque service
   void _showServiceMessage(BuildContext context, String service) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('$service sélectionné. Fonctionnalité à venir!')),
@@ -98,7 +204,6 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
-// Widget pour représenter chaque service comme une carte avec icône et titre
 class _ServiceCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -126,7 +231,7 @@ class _ServiceCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -134,15 +239,16 @@ class _ServiceCard extends StatelessWidget {
   }
 }
 
-// Widget pour afficher une commande en cours avec ses détails
-class _OrderCard extends StatelessWidget {
-  final String orderId;
-  final String destination;
+class _TransactionCard extends StatelessWidget {
+  final String transactionId;
+  final String amount;
+  final String date;
   final String status;
 
-  const _OrderCard({
-    required this.orderId,
-    required this.destination,
+  const _TransactionCard({
+    required this.transactionId,
+    required this.amount,
+    required this.date,
     required this.status,
   });
 
@@ -152,12 +258,38 @@ class _OrderCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: ListTile(
         leading: Icon(
-          Icons.delivery_dining,
-          color: status == 'Livré' ? Colors.green : Colors.orange,
+          Icons.monetization_on,
+          color: status == 'Réussi'
+              ? Colors.green
+              : (status == 'En attente' ? Colors.orange : Colors.red),
         ),
-        title: Text('Commande #$orderId'),
-        subtitle: Text('Destination: $destination\nStatut: $status'),
+        title: Text('Transaction #$transactionId'),
+        subtitle: Text('Montant: $amount\nDate: $date\nStatut: $status'),
       ),
     );
+  }
+}
+
+class CoursesPage extends StatelessWidget {
+  const CoursesPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Page des Courses'));
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Page de Profil'));
+  }
+}
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Page des Paramètres'));
   }
 }
