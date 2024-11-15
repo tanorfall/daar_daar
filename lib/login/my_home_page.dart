@@ -122,6 +122,7 @@ class DashboardPage extends StatelessWidget {
             'Bienvenue sur Daar Daar Express',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  
                 ),
           ),
           const SizedBox(height: 10),
